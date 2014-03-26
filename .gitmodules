@@ -1,0 +1,3 @@
+[submodule "foundation-cli"]
+	path = foundation-cli
+	url = https://bitbucket.org/taccaci/foundation-cli.git
