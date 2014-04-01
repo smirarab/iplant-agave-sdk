@@ -1,0 +1,66 @@
+#!/bin/bash
+
+echo "We are going to create and enroll personal copies of various HPC systems"
+echo "used by iPlant staff developers to build apps."
+echo "The following assumes you have created an Agave client via client-create."
+echo -e "We will now ask you to refresh your access token...\n"
+
+set -e
+auth-tokens-create -S
+sleep 2
+
+IPLANT_SDK_HOME="/Users/mwvaughn/agave2-mar-2014/iplant-agave-sdk"
+
+echo "We will now configuring TACC-managed systems and need some info from you"
+echo -e "\tTACC username"
+echo -e "\tTACC password"
+echo -e "\tTACC Project name"
+echo -e "\tThe path to your \$WORK directory on TACC systems"
+echo -e "\n"
+
+default="Yes"
+read -p "Do you have all the information required? [$default]: " READY
+READY=${READY:-$default}
+if [ "$READY" != "Yes" ]; then exit 1; fi
+
+echo "OK. Let's begin."
+
+default="vaughn"
+read -p "Enter your TACC user account [$default]: " USERNAME
+USERNAME=${USERNAME:-$default}
+echo "Confirmed: TACC user account is $USERNAME"
+
+default=""
+read -s -p "Enter your TACC account password [$default]: " PASSWORD
+PASSWORD=${PASSWORD:-$default}
+echo "\n"
+
+default="iPlant-Collabs"
+read -p "Enter a TACC project associated with this system [$default]: " PROJECT
+PROJECT=${PROJECT:-$default}
+echo "Confirmed: TACC project is $PROJECT"
+
+default="/work/01374/vaughn"
+read -p "Enter your TACC work directory [$default]: " WORKD
+WORKD=${WORK:-$default}
+echo "Confirmed: TACC work directory is $WORK"
+
+# Create a date stamp to ensure the system name is fairly unique
+DATESTAMP=$(date +%m%d%Y-%k%M)
+
+for F in $IPLANT_SDK_HOME/templates/tacc*
+do
+BN=$(basename $F .jsonx)
+echo $BN
+cp $F "$BN.json" && chmod 600 $BN.json
+# Find and replace on Macros
+sed -i ".bak" "s/%USERNAME/$USERNAME/g" "$BN.json"
+sed -i ".bak" "s/%PROJECT/$PROJECT/g" "$BN.json"
+sed -i ".bak" "s/%PASSWORD/$PASSWORD/g" "$BN.json"
+sed -i ".bak" "s/%DATESTAMP/$DATESTAMP/g" "$BN.json"
+sed -i ".bak" "s|%WORK|$WORKD|g" "$BN.json"
+echo "Enrolling private system $BN"
+systems-addupdate -F "$BN.json" && systems-list && rm -rf "$BN.json"
+done
+
+set +e
