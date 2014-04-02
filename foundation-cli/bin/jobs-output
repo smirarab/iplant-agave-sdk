@@ -1,0 +1,171 @@
+#!/bin/bash
+# 
+# jobs-output
+# 
+# author: dooley@tacc.utexas.edu
+#
+# This script is part of the Agave API command line interface (CLI).
+# It retrieves a listing of the job output. If the job completed 
+# normally and archived, the listing will be on the archive directory.
+# Otherwise, it will be on the work folder if it still exists. By 
+# specifying the --download flag, the remote file will be downloaded
+# to the specified directory
+#
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$DIR/common.sh"
+
+# Script logic -- TOUCH THIS {{{
+
+# A list of all variables to prompt in interactive mode. These variables HAVE
+# to be named exactly as the longname option definition in usage().
+interactive_opts=(apisecret apikey)
+
+# Print usage
+usage() {
+  echo -n "$(basename $0) [OPTION]... [JOB_ID] [PATH]
+
+List or download job output.
+
+ Options:
+  -z, --access_token	Access token
+  -D, --download    Download the output file to the local folder
+  -N, --name    	Name to give the downloaded file
+  -P, --path		Path to desired output file relative to job output folder
+  -H, --hosturl     URL of the service
+  -d, --development Run in dev mode using default dev server
+  -f, --force       Skip all user interaction
+  -i, --interactive Prompt for values
+  -q, --quiet       Quiet (no output)
+  -v, --verbose     Verbose output
+  -V, --veryverbose Very verbose output
+  -h, --help        Display this help and exit
+      --version     Output version information and exit
+"
+}
+
+##################################################################
+##################################################################
+#						Begin Script Logic						 #
+##################################################################
+##################################################################
+
+source "$DIR/jobs-common.sh"
+
+main() {
+	#echo -n
+	#set -x
+	
+	if [ -z "$args" ]; then
+		err "Please specify a job id for which to view the output"
+	else
+		scriptargs=($args)
+		jobid=${scriptargs[0]}
+		
+		if [ -n "$download" ]; then
+			
+			if [ -z "$path" ]; then
+				response="Please specify an output file path to download"
+				err "$response"
+			else
+			
+				if [ -z "$name" ]; then
+					name=`basename $path`
+				fi
+			
+				cmd="curl -k -H \"${authheader}\" -o \"$name\" $hosturl${jobid}/outputs/media/${path}"
+
+				if ((veryverbose)); then
+					log "Calling $cmd"
+				fi
+	
+				eval response=`curl -k -H "${authheader}" -o "${name}" "${hosturl}${jobid}/outputs/media/${path}"`
+			
+				if [ 0 -eq $? ]; then
+					success "Successfully downloaded ${path} from job ${jobid} to ${name}"
+				else
+					err "Failed to download $path from job $jobid"
+				fi
+			fi
+		else
+			
+			cmd="curl -sk -H \"${authheader}\" ${hosturl}${jobid}/outputs/listings/${path}?pretty=true"
+
+			if ((veryverbose)); then
+				log "Calling $cmd"
+			fi
+	
+			response=`curl -sk -H "${authheader}" "${hosturl}${jobid}/outputs/listings/${path}?pretty=true"`
+
+			if [[ $(jsonquery "$response" "status") = 'success' ]]; then
+				result=$(format_api_json "$response")
+				success "$result"
+			else
+				errorresponse=$(jsonquery "$response" "message")
+				err "$errorresponse"
+			fi
+		fi
+	fi		
+}
+
+format_api_json() {
+	
+	if ((veryverbose)); then
+		echo "$1"
+	elif [[ $verbose -eq 1 ]]; then
+		result=$(jsonquery "$1" "result" 1)
+		echo "${result}" | python -mjson.tool
+	else
+		result=$(jsonquery "$1" "result.[].name")
+		echo "${result}"
+	fi
+}
+
+##################################################################
+##################################################################
+#						End Script Logic						 #
+##################################################################
+##################################################################
+
+# }}}
+
+# Parse command line options
+source "$DIR/options.sh"
+
+
+# Main loop {{{
+
+# Print help if no arguments were passed.
+#[[ $# -eq 0 ]] && set -- "--help"
+
+# Read the options and set stuff
+while [[ $1 = -?* ]]; do
+  case $1 in
+    -h|--help) usage >&2; safe_exit ;;
+    --version) version; copyright; disclaimer; safe_exit ;;
+    -z|--access_token) shift; access_token=$1 ;;
+    -P|--path) shift; path=$1 ;;
+    -D|--download) download=1 ;;
+    -N|--name) download=1 ;;
+    -H|--hosturl) shift; hosturl=$1;;
+  	-d|--development) development=1 ;;
+    -v|--verbose) verbose=1 ;;
+    -V|--veryverbose) veryverbose=1; verbose=1 ;;
+    -q|--quiet) quiet=1 ;;
+    -i|--interactive) interactive=1 ;;
+    -f|--force) force=1 ;;
+    --endopts) shift; break ;;
+    *) die "invalid option: $1" ;;
+  esac
+  shift
+done
+
+# Store the remaining part as arguments.
+args+=("$@")
+
+# }}}
+
+# Run the script logic
+source "$DIR/runner.sh"
+
