@@ -61,7 +61,7 @@ You should get a response from clients-create that looks similar to this:
     "tier": "Unlimited"
 }
 ```
-Although much of the process of interacting with the Agave API is automated, you may need access to the consumerKey and consumerSecret for other types of OAuth2-based interaction. If you ever need to retrieve the API keys for a particular client application, you can always do so at https://agave.iplantc.org/store/site/pages/subscriptions.jag
+Although much of the process of interacting with the Agave API is automated, you may need access to the consumerKey and consumerSecret for other types of OAuth2-based interaction. If you ever need to retrieve the API keys for a particular client application, you can always do so at https://agave.iplantc.org/store/site/pages/subscriptions.jag using your iPlant credentials
 
 *This completes the section on obtaining a set of API keys.*
 
@@ -152,7 +152,9 @@ maverick-04012014-1718-vaughn
 data.iplantcollaborative.org
 ```
 
-In the current working directory, you will find several JSON files. These contain the descriptions of the private systems created, including your password for each system. Either delete them or set their permissions so that only you can read them:
+The systems with your (in the above case *vaughn*) username are private executionSystems that you can use to develop and run Agave apps.
+
+*Note* In the current working directory, you will find several JSON files. These contain the descriptions of the private systems created, including your password for each system. Either delete them or set their permissions so that only you can read them:
 ```sh
 chmod 600 *.json
 ```
@@ -358,5 +360,4 @@ cd $WORK/iPlant
 # Upload using the icommands
 iput -frPVT samtools-0.1.19 applications/
 ```
-Any time you need to update the binaries, libraries, templates, etc. you can just make the changes locally and re-upload. The next time Agave invokes a job using this application, it will stage out the updated version of the application bundle.
-
+Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave invokes a job using this application, it will stage out the updated version of the application bundle.
