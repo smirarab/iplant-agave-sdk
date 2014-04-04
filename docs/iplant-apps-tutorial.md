@@ -371,3 +371,10 @@ Rather than have you write a description for "samtools sort" yourself, we're goi
 cd $WORK/iPlant/samtools-0.1.19/stampede/
 cp $IPLANT_SDK_HOME/examples/samtools-0.1.19/stampede/samtools-sort.json .
 ```
+
+The file *samtools-sort.json* is a JSON file written to conform to a specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details in the following sections.  
+
+#### Basic application metadata
+#### Defining inputs
+#### Defining parameters
+#### Defining outputs
