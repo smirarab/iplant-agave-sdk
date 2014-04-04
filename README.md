@@ -17,6 +17,6 @@ We have assembled this software development kit with an eye towards developers a
 * [Creating an OAuth2 client and getting a set of keys](docs/client-create.md)
 * [Obtaining an OAuth 2 authentication token](docs/set-token.md)
 * [Setting up iPlant development systems](docs/iplant-systems.md)
-** [Setting up your own systems]
+ * [Setting up your own systems]
 * [Creating an iPlant application for TACC Stampede](docs/iplant-first-app.md)
-** [Creating an iPlant application on your own systems]
+ * [Creating an iPlant application on your own systems]
