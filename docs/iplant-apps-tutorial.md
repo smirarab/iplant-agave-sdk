@@ -294,8 +294,10 @@ Assuming you didn't make any typos, you'll end up with a sorted BAM called *sort
 ### Create a template script
 
 Make a copy of your test-sort.sh script, so you can refer back to it later.
+
 ```sh
-cp test-sort.sh sort.template```
+cp test-sort.sh sort.template
+```
 
 Now, open template.slurm in the text editor of your choice. Delete the bash shebang line and the SLURM pragmas. Replace the hard-coded values for inputs and parameters with variables (these will be passed in by Agave services based on user-specified values. More on this later...)
 
