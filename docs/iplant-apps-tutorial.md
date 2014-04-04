@@ -361,3 +361,13 @@ cd $WORK/iPlant
 iput -frPVT samtools-0.1.19 applications/
 ```
 Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave invokes a job using this application, it will stage out the updated version of the application bundle.
+
+### Creating an application description
+
+In order for Agave to know how to run an instance of the application, we need to provide quite a bit of metadata about the application. This includes a unique name and version, the location of the application bundle, the identities of the execution system and destination system for results, whether its an HPC or other kind of job, the default number of processors and memory it needs to run, and of course, all the inputs and parameters for the actual program. It seems complicated, but only because you're comfortable with the command line already. Agave's model lets applications be portable across systems and present a rationalized interface to consumers so that they can focus on science rather than fighting with compiler flags and the vagaries of learning every wierd command flag across all the applications they want to use in a workflow.
+
+Rather than have you write a description for "samtools sort" yourself, we're going to systematically dissect an existing file provided with the SDK. Go ahead and copy the file into place and open it in your text editor of choice. If you don't have the SDK installed, you can [grab it here](../examples/samtools-0.1.19/stampede/samtools-sort.json).
+```sh
+cd $WORK/iPlant/samtools-0.1.19/stampede/
+cp $IPLANT_SDK_HOME/examples/samtools-0.1.19/stampede/samtools-sort.json .
+```
