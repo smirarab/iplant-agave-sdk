@@ -10,6 +10,7 @@
  "executionSystem":"stampede-04012014-1718-vaughn",
  "executionType":"HPC",
  "helpURI":"http://samtools.sourceforge.net/samtools.shtml",
+ "label": "SAMtools sort",
  "longDescription":"",
  "modules":[],
  "name":"samtools-sort",
