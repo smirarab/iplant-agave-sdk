@@ -178,7 +178,6 @@ Each time you (or another user) requests an instance of samtools sort, Agave cop
 ```sh
 # Check to see if you have an applications directory
 files-list -S data.iplantcollaborative.org IPLANTUSERNAME/applications
-ils applications
 # If you see: File/folder does not exist
 # then you need to create an applications directory
 files-mkdir -S data.iplantcollaborative.org -N "applications" IPLANTUSERNAME/
