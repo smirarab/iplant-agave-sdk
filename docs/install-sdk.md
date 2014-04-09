@@ -18,8 +18,6 @@ echo "PATH=\$PATH:\$IPLANT_SDK_HOME/scripts:" >> ~/.bashrc
 echo "PATH=\$PATH:\$IPLANT_SDK_HOME/foundation-cli/bin" >> ~/.bashrc
 # To re-init bash _type_:
 source ~/.bashrc
-# load iRODS into your environment
-module load irods
 ```
 *This completes the section on installing the iPlant Agave SDK.*
 

@@ -63,7 +63,7 @@ Your objective here is to create a script that you know will run to completion u
 
 First, grab some test data into your working directory. You can use a test file
 ```sh
-iget -frPVT /iplant/home/shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam
+files-get -S data.iplantcollaborative.org shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam
 ```
 or you can use any other BAM file for your testing purposes. Just change the filename in your script accordingly.
 
@@ -177,20 +177,19 @@ Each time you (or another user) requests an instance of samtools sort, Agave cop
 *Note* If you've never deployed an Agave-based app, you may not have an applications directory in your home folder. Since this is where we recommend you store your apps, create one.
 ```sh
 # Check to see if you have an applications directory
-icd
+files-list -S data.iplantcollaborative.org IPLANTUSERNAME/applications
 ils applications
-# If you see something like this
-# ERROR: lsUtil: srcPath /iplant/home/vaughn/applications does not exist or user lacks access permission
-# you need to create an applications directory
-imkdir applications
+# If you see: File/folder does not exist
+# then you need to create an applications directory
+files-mkdir -S data.iplantcollaborative.org -N "applications" IPLANTUSERNAME/
 ```
 
 Now, upload your application bundle:
 ```sh
 # cd out of the bundle
 cd $WORK/iPlant
-# Upload using the icommands
-iput -frPVT samtools-0.1.19 applications/
+# Upload using files-upload
+files-upload -S data.iplantcollaborative.org -F samtools-0.1.19 IPLANTUSERNAME/applications
 ```
 Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave invokes a job using this application, it will stage out the updated version of the application bundle.
 
