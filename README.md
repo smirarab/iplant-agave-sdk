@@ -18,7 +18,7 @@ We have assembled this software development kit with an eye towards developers a
 * [Obtaining an OAuth 2 authentication token](docs/set-token.md)
 * [Setting up iPlant development systems](docs/iplant-systems.md)
 * [Creating an iPlant application for TACC Stampede](docs/iplant-first-app.md)
-* [Running a job using your Agave app]
+* [Running a job using your Agave app](docs/iplant-first-app-job.md)
 * [Debugging your private app]
 * [Updating your private app]
 * [Sharing an app with others]

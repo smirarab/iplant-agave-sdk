@@ -180,7 +180,7 @@ There is a defined list of application metadata fields, some of which are mandat
 
 ### Inputs
 
-To tell Agave what files to stage into place before job execution, you need to define the app's inputs. In our example, we need to tell Agave that a BAM file is needed to act as the subject of our sort. Here's one way of making such a specification:
+To tell Agave what files to stage into place before job execution, you need to define the app's inputs in a JSON array. To implement the SAMtools sort app, we need to tell Agave that a BAM file is needed to act as the subject of our sort.
 
 ```json
    {"id":"inputBam",
@@ -209,7 +209,7 @@ Here's a walkthrough of what these fields mean:
 | id.value.default | | string | The path, relative to X, of the default value for the input |
 | id.value.order | | integer | Ignore for now |
 | id.value.required | X | boolean | Is specification of this input mandatory to run a job? |
-| id.value.validator | | string | Java-format regular expression to restrict valid values |
+| id.value.validator | | string | [Java-format regular expression](http://ocpsoft.org/opensource/guide-to-regular-expressions-in-java-part-1/) to restrict valid values |
 | id.value.visible | | boolean | When automatically generated a UI, should this field be visible to end users? |
 | semantics.ontology | | array[string] | List of ontology terms (or URIs pointing to ontology terms) applicable to the input format |
 | semantics.minCardinality | | integer | Minimum number of values accepted for this input |
@@ -220,12 +220,89 @@ Here's a walkthrough of what these fields mean:
 | details.argument | | string | The command-line argument associated with specifying this input at run time |
 | details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated |
 
-*A note on paths*: In this iPlant tutorial, we assume for the most part that you will stage data to and from the default storage system for iPlant users "data.iplantcollaborative.org". In this case, you can use relative paths relative to homeDir on that system (i.e. vaughn/analyses/foobar). For added portability, or to marshal data from other storageSystems or public URIs, you can always specify fully qualified URIs in one of two forms:
-* storageSystem namespace: agave://
+*A note on paths*: In this iPlant-oriented tutorial, we assume you will stage data to and from "data.iplantcollaborative.org", the default storage system for iPlant users. In this case, you can use relative paths relative to homeDir on that system (i.e. vaughn/analyses/foobar). To add portability, marshal data from other storageSystems, or import from public servers, you can also specify fully qualified URIs as follows:
+* storageSystem namespace: agave://storage-system-name/path/to/file
 * public URI namespace: https://www.cnn.com/index.html
 
-### Parameters
 ### Outputs
+
+While we don't support them 100% yet, Agave apps are designed to participate in workflows. Thus, just as we define the list of valid and required inputs to an app, we also must (if possible) define a list of its outputs. This allows it to "advertise" to consumers of Agave services what it expects to emit, allowing apps to be chained together. Outputs are defined basically the same way as inputs:
+
+```json
+{"id":"bam",
+     "value":
+        {"default":"sorted.bam",
+         "order":0,
+         "required":false,
+         "validator":"",
+         "visible":true},
+     "semantics":
+        {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],
+         "minCardinality":1,
+         "fileTypes":["raw-0"]},
+     "details":
+        {"description":"",
+         "label":"Sorted BAM file",
+         "argument":null,
+         "showArgument":false}}
+```
+
+Obligatory field walk-through:
+
+| Field | Mandatory | Type | Description |
+| ----- | --------- | ---- | ----------- |
+| id | X | string | This is the "name" of the output. It is not currently used by the wrapper script but may be in the future|
+| id.value.default | | string | If your app has a fixed-name output, specify it here |
+| id.value.order | | integer | Ignore for now |
+| id.value.validator | | string | [Java-format regular expression](http://ocpsoft.org/opensource/guide-to-regular-expressions-in-java-part-1/) used to match output files |
+| semantics.ontology | | array[string] | List of ontology terms (or URIs pointing to ontology terms) applicable to the output format |
+| semantics.minCardinality | | integer | Minimum number of values expected for this output |
+| semantics.maxCardinality | | integer | Maximum number of values expected for this output |
+| semantics.fileTypes | X | array[string] | List of Agave file types that may apply to the output. Always use "raw-0" for the time being |
+| details.description | | string | Human-readable description of the output |
+| details.label | | string | Human-readable label for the output |
+| details.argument | | string | The command-line argument associated with specifying this output at run time (not currently used) |
+| details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated (not currently used) |
+
+### Parameters
+
+Parameters are specified via a JSON array, and are broadly similar to inputs and outputs. Here's an example of the parameter we will define allowing users to specify how much RAM to use in a "samtools sort" operation.
+
+```json
+    {"id":"maxMemSort",
+     "value":
+        {"default":"500000000",
+         "order":1,
+         "required":true,
+         "type":"number",
+         "validator":"",
+         "visible":true},
+     "semantics":
+        {"ontology":["xs:integer"]},
+     "details":
+        {"description":null,
+         "label":"Maxiumum memory in bytes, used for sorting",
+         "argument":"-m",
+         "showArgument":false}},
+```
+
+| Field | Mandatory | Type | Description |
+| ----- | --------- | ---- | ----------- |
+| id | X | string | This is the "name" of the parameter. At runtime, it will be replaced in your script template based on the value passed as part of the job specification |
+| id.value.default | | string | If your app has a fixed-name output, specify it here |
+| id.value.order | | integer | Ignore for now. Supports automatic generation of command lines. |
+| id.value.required | | boolean | Is specification of this parameter mandatory to run a job?  |
+| id.value.type | | string | JSON type for this parameter (used to generate and validate UI). Valid values: "string", "number", "enumeration", "bool", "flag" |
+| id.value.validator | | string | [Java-format regular expression](http://ocpsoft.org/opensource/guide-to-regular-expressions-in-java-part-1/) to restrict valid values |
+| id.value.visible | | boolean | When automatically generated a UI, should this field be visible to end users? |
+| semantics.ontology | | array[string] | List of ontology terms (or URIs pointing to ontology terms) applicable to the parameter. We recommend at least specifying an [XSL Schema Simple Type](http://www.schemacentral.com/sc/xsd/s-datatypes.xsd.html). |
+| details.description | | string | Human-readable description of the parameter. Often used to create contextual help in automatically generated UI |
+| details.label | | string | Human-readable label for the parameter. Often implemented as text label next to the field in automatically generated UI |
+| details.argument | | string | The command-line argument associated with specifying this parameter at run time |
+| details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated |
+
+### Notes
+1. If you're used to Perl regex, Java expressions have slightly different syntax. To test out your validation expressions, you can use a handy tool at [RegexPlanet](http://www.regexplanet.com/advanced/java/index.html).
 
 Create a template script
 ------------------------
@@ -274,17 +351,17 @@ samtools sort ${ARGS} $inputBam ${outputPrefix}
 # Now, delete the bin/ directory
 rm -rf bin
 ```
-### Upload the application bundle
+### Uploading the application bundle
 
-Each time you (or another user) requests an instance of samtools sort, Agave copies data from a "deploymentPath" on a "storageSystem" to create the temporary directory on an "executionSystem". Now that you've crafted the application bundle's dependencies and script template, it's time to store it somewhere accessible by Agave. 
+Each time you (or another user) requests an instance of samtools sort, Agave copies data from a "deploymentPath" on a "storageSystem" as part of creating the temporary working directory on an "executionSystem". Now that you've crafted the application bundle's dependencies and script template, it's time to store it somewhere accessible by Agave. 
 
 *Note* If you've never deployed an Agave-based app, you may not have an applications directory in your home folder. Since this is where we recommend you store the apps, create one.
 ```sh
 # Check to see if you have an applications directory
-files-list -S data.iplantcollaborative.org IPLANTUSERNAME/applications
+files-list -S data.iplantcollaborative.org $IPLANTUSERNAME/applications
 # If you see: File/folder does not exist
 # then you need to create an applications directory
-files-mkdir -S data.iplantcollaborative.org -N "applications" IPLANTUSERNAME/
+files-mkdir -S data.iplantcollaborative.org -N "applications" $IPLANTUSERNAME/
 ```
 
 Now, upload the application bundle:
@@ -292,21 +369,47 @@ Now, upload the application bundle:
 # cd out of the bundle
 cd $WORK/iPlant
 # Upload using files-upload
-files-upload -S data.iplantcollaborative.org -F samtools-0.1.19 IPLANTUSERNAME/applications
+files-upload -S data.iplantcollaborative.org -F samtools-0.1.19 $IPLANTUSERNAME/applications
 ```
-Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave invokes a job using this application, it will stage out the updated version of the application bundle.
+Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave creates a job using this application, it will stage the updated version of the application bundle into place on the executionSystem and it to complete your task.
 
-Post your app description
--------------------------
+Submit your app description
+---------------------------
 
 ```sh
 apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json
 ```
 
-Any time you need to update the metadata description of your non-public application, you can just make the changes locally to the JSON file and and re-post it as such. The field *samtools-sort-0.1.19* at the end is the appid you're updating. Agave tries to guess from the JSON file but to remove uncertainty, we recommend always specifying it explicitly. 
+Any time you need to update the metadata description of your non-public application, you can just make the changes locally to the JSON file and and re-post it. The next time Agave creates a job using this application, it will use the new description.
 
 ```sh
 apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json samtools-sort-0.1.19
 ```
 
-The next time Agave invokes a job using this application, it will use the new description.
+The field *samtools-sort-0.1.19* at the end is the appid you're updating. Agave tries to guess from the JSON file but to remove uncertainty, we recommend always specifying it explicitly. 
+
+Verify your app description
+---------------------------
+
+First, you can check to see if your new application shows up in the bulk listing:
+
+```sh
+# Shows all apps - public, private, or shared with you
+apps-list 
+# Show all apps on a specific system
+apps-list -S stampede.tacc.utexas.edu
+# Show private apps
+apps-list --privateonly
+```
+
+You should see *samtools-sort-0.1.19* in "apps-list" and "apps-list --privateonly" but not "apps-list -S stampede.tacc.utexas.edu". Why do you think this is the case? Give up? It's because the app "samtools-sort-0.1.19" is not registered to the public iPlant-maintained executionSystem called "stampede.tacc.utexas.edu"
+
+You can print a detailed view, in JSON format, of the app description to your screen:
+
+```sh
+apps-list -v samtools-sort-0.1.19
+```
+
+*This completes the section on creating and enrolling your own simple application.*
+
+[Back to READ ME](../README.md) | [Next: Running a job using your Agave app](iplant-first-app-job.md)
