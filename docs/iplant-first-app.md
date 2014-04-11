@@ -7,27 +7,28 @@ package-name-version.dot.dot
 |--system_name
 |----bin.tgz (optional)
 |----test.sh
-|----template.(sge|slurm|pbs)
+|----script.template
 |----test_data (optional)
 |----app.json
 ```
 
-When a job is executed, this bundle of files is staged into place in a temporary directory on the target system. Then, the input data files (we'll show you how to specify those are later) are staged into place. Next, Agave writes a scheduler submit script (using a template you provide i.e. template.xxx) and puts it in the queue on the target system. It monitors progress of the job and assuming it completes, Agave copies all new files to the location specified when the job was submitted. Along the way, critical milestones are recorded in the job's history. 
+When a job is executed, this bundle of files is staged into place in a temporary directory on the target executionSystem. Then, the input data files (we'll show you how to specify those are later) are staged into place automatically. Next, Agave writes a scheduler submit script (using a template you provide i.e. script.template) and puts it in the queue on the target system. The Agave service then monitor progress of the job and, assuming it completes, copies all newly-created files to the location specified when the job was submitted. Along the way, critical milestones and metadata are recorded in the job's history. 
 
 Create an application bundle
 ----------------------------
-We will now go through the process of building and deploying an Agave application to provide 'samtools sort' functionality on the Stampede system. The following steps assume you have properly installed and configured the iPlant SDK on Stampede.
+We will now go through the process of building and deploying an Agave application to provide 'samtools sort' functionality on the Stampede system. The following steps assume you have properly installed and configured the iPlant SDK on Stampede. They assume you have defined an environment variable IPLANTUSERNAME as your iPlant username.
 
 ```sh
 # Log into Stampede and set up a project directory
 ssh stampede.tacc.utexas.edu
+# All TACC systems have a directory than can be accessed as $WORK
 cd $WORK
 mkdir iPlant
 mkdir iPlant/src
 mkdir -p iPlant/samtools-0.1.19/stampede/bin
 mkdir -p iPlant/samtools-0.1.19/stampede/test
 # Build samtools using the Intel C Compiler
-# If you don't have icc, gcc will work but icc gives faster code
+# If you don't have icc, gcc will work but icc usually gives more efficient binaries
 cd iPlant/src
 wget "http://downloads.sourceforge.net/project/samtools/samtools/0.1.19/samtools-0.1.19.tar.bz2"
 tar -jxvf samtools-0.1.19.tar.bz2
@@ -49,25 +50,27 @@ Command: view        SAM<->BAM conversion
          mpileup     multi-way pileup...
 # Package up the bin directory as an compressed archive 
 # and remove the original. This preserves the execute bit
-# over file movements and consolidates movement of all
-# bundled dependencies in bin to a single operation
+# and other permissions and consolidates movement of all
+# bundled dependencies in bin to a single operation. You
+# can adopt a similar approach with lib and include.
 tar -czf bin.tgz bin && rm -rf bin
 ```
 Create a test script
 --------------------
-Your objective here is to create a script that you know will run to completion under the Stampede scheduler and environment. The standard is to use Bash for these, so that's what we'll do. You need to accomplish a few things in your script:
+Your first objective is to create a script that you know will run to completion under the Stampede scheduler and environment (or whatever executionSystem you're working on). It will serve as a model for the template file you create later. In our case, we need to write a script that can be submitted to the Slurm scheduler. The standard is to use Bash for such scripts. You have five main objectives in your script:
 * Unpack binaries from bin.tgz
 * Extend your PATH to contain bin
 * Craft some option-handling logic to accept parameters from Agave
+* Craft a command line invocation of the application you will run
 * Clean up when you're done
 
-First, grab some test data into your working directory. You can use a test file
+First, you will need some test data in your working directory. You can use a test file
 ```sh
 files-get -S data.iplantcollaborative.org shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam
 ```
-or you can use any other BAM file for your testing purposes. Just change the filename in your script accordingly.
+or you can any other BAM file for your testing purposes. Make sure if you use another file to change the filename in your test script accordingly!
 
-Now, author your script. You can paste this script into a file called *test-sort.sh* or you can copy it from $IPLANT_SDK_HOME/examples/samtools-0.1.19/stampede/test-sort.sh
+Now, author your script. You can paste the following code into a file called *test-sort.sh* or you can copy it from $IPLANT_SDK_HOME/examples/samtools-0.1.19/stampede/test-sort.sh
 
 ```sh
 #!/bin/bash
@@ -78,36 +81,45 @@ Now, author your script. You can paste this script into a file called *test-sort
 
 #SBATCH -p development
 #SBATCH -t 00:30:00
-#SBATCH -n 15
+#SBATCH -n 16
 #SBATCH -A iPlant-Collabs 
 #SBATCH -J test-samtools
 #SBATCH -o test-samtools.o%j
 
 # Set up inputs and parameters
 # We're emulating passing these in from Agave
-#
-#inputBam is the name of one of the inputs we
-#will specify later
+# inputBam is the name of the file to be sorted
 inputBam="ex1.bam"
-# outputPrefix is a parameter we specify later
-# For now, we will set it statically
-outputPrefix=sorted
-# maximum memory for sort, in bytes
+# outputPrefix is a parameter that establishes
+# the prefix for the final sorted file
+outputPrefix="sorted"
+# Parameter for memory used in sort operation, in bytes
 maxMemSort=500000000
 # Boolean: Sort by name instead of coordinate
 nameSort=0
 
 # Unpack the bin.tgz file containing samtools binaries
-# If you are relying entirely on system-supplied binaries you don't
-# need this bit
+# If you are relying entirely on system-supplied binaries 
+# you don't need this bit
 tar -xvf bin.tgz
-# Set the PATH to include binaries in bin
+# Extend PATH to include binaries in bin
+# If you need to extend lib, include, etc 
+# the same approach is applicable
 export PATH=$PATH:"$PWD/bin"
- 
-# Build up an ARGS string for the program
+
+# Dynamically construct a command line
+# by building an ARGS string then
+# adding the command, file specifications, etc
+#
+# We're doing this in a way familar to Agave V1 users
+# first. Later, we'll illustrate how to make use of
+# Agave V2's new parameter passing functions
+#
 # Start with empty ARGS...
 ARGS=""
 # Add -m flag if maxMemSort was specified
+# You might want to add a constraint for how large maxMemSort
+# can be based on the available memory on your executionSystem
 if [ ${maxMemSort} > 0 ]; then ARGS="${ARGS} -m $maxMemSort"; fi
 ARGS="-m $maxMemSort"
 # Boolean handler for -named sort
@@ -119,25 +131,26 @@ samtools sort ${ARGS} $inputBam ${outputPrefix}
 # Now, delete the bin/ directory
 rm -rf bin
 ```
-Submit the job to the queue on Stampede...
+### Submit the job to the queue on Stampede...
 ```sh
 sbatch test-sort.sh 
 ```
-Assuming you didn't make any typos, you'll end up with a sorted BAM called *sorted.bam*, and your bin directory (but not the bin.tgz file) should be fone. Congratulations, you're in the home stretch: it's time to turn the test script into an Agave script template.
+Assuming all goes according to plan, you'll end up with a sorted BAM called *sorted.bam*, and your bin directory (but not the bin.tgz file) should be erased. Congratulations, you're in the home stretch: it's time to turn the test script into an Agave app.
 
 Creating an application description
 -----------------------------------
-In order for Agave to know how to run an instance of the application, we need to provide quite a bit of metadata about the application. This includes a unique name and version, the location of the application bundle, the identities of the execution system and destination system for results, whether its an HPC or other kind of job, the default number of processors and memory it needs to run, and of course, all the inputs and parameters for the actual program. It seems complicated, but only because you're comfortable with the command line already. Agave's model lets applications be portable across systems and present a rationalized interface to consumers so that they can focus on science rather than fighting with compiler flags and the vagaries of learning every wierd command flag across all the applications they want to use in a workflow.
+In order for Agave to know how to run an instance of the application, we need to provide quite a bit of metadata about the application. This includes a unique name and version, the location of the application bundle, the identities of the execution system and destination system for results, whether its an HPC or other kind of job, the default number of processors and memory it needs to run, and of course, all the inputs and parameters for the actual program. It seems a bit over-complicated, but only because you're comfortable with the command line already. Your goal here is to allow your applications to be portable across systems and present a web-enabled, rationalized interface for your code to consumers.
 
-Rather than have you write a description for "samtools sort" yourself, we're going to systematically dissect an existing file provided with the SDK. Go ahead and copy the file into place and open it in your text editor of choice. If you don't have the SDK installed, you can [grab it here](../examples/samtools-0.1.19/stampede/samtools-sort.json).
+Rather than have you write a description for "samtools sort" from scratch, let's systematically dissect an existing file provided with the SDK. Go ahead and copy the file into place and open it in your text editor of choice. If you don't have the SDK installed, you can [grab it here](../examples/samtools-0.1.19/stampede/samtools-sort.json).
 ```sh
 cd $WORK/iPlant/samtools-0.1.19/stampede/
 cp $IPLANT_SDK_HOME/examples/samtools-0.1.19/stampede/samtools-sort.json .
 ```
+Open up samtools-sort.json in a text editor or [in your web browser](../examples/samtools-0.1.19/stampede/samtools-sort.json) and follow along below.
 
 ### Overview
 
-The file *samtools-sort.json* is a [JSON](http://www.json.org/) file written to conform to a specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. *To make this file work for you, you will at minimum need to edit its executionSystem to match your private instance of Stampede*.
+Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. *To make this file work for you, you will at minimum need to edit its executionSystem to match your private instance of Stampede*.
 
 All Agave application descriptions have the following structure:
 
@@ -149,7 +162,7 @@ All Agave application descriptions have the following structure:
 }
 ```
 
-There is a defined list of application metadata fields, some of which are mandatory. Inputs, parameters, and outputs are specified as an array of specific data structures, which will be described below.
+There is a defined list of application metadata fields, some of which are mandatory. Inputs, parameters, and outputs are specified as an array of simple data structures, which will be described below.
 
 ### Application metadata
 
@@ -180,7 +193,7 @@ There is a defined list of application metadata fields, some of which are mandat
 
 ### Inputs
 
-To tell Agave what files to stage into place before job execution, you need to define the app's inputs in a JSON array. To implement the SAMtools sort app, we need to tell Agave that a BAM file is needed to act as the subject of our sort.
+To tell Agave what files to stage into place before job execution, you need to define the app's inputs in a JSON array. To implement the SAMtools sort app, you need to tell Agave that a BAM file is needed to act as the subject of our sort:
 
 ```json
    {"id":"inputBam",
@@ -226,7 +239,7 @@ Here's a walkthrough of what these fields mean:
 
 ### Outputs
 
-While we don't support them 100% yet, Agave apps are designed to participate in workflows. Thus, just as we define the list of valid and required inputs to an app, we also must (if possible) define a list of its outputs. This allows it to "advertise" to consumers of Agave services what it expects to emit, allowing apps to be chained together. Outputs are defined basically the same way as inputs:
+While we don't support them 100% yet, Agave apps are designed to participate in workflows. Thus, just as we define the list of valid and required inputs to an app, we also must (when we know them) define a list of its outputs. This allows it to "advertise" to consumers of Agave services what it expects to emit, allowing apps to be chained together. Outputs are defined basically the same way as inputs:
 
 ```json
 {"id":"bam",
@@ -264,9 +277,11 @@ Obligatory field walk-through:
 | details.argument | | string | The command-line argument associated with specifying this output at run time (not currently used) |
 | details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated (not currently used) |
 
+*Note*: If the app you are working on doesn't natively produce output with a predictable name, one thing you can do is add extra logic to your script to take the existing output and rename it to something you can control or predict. 
+
 ### Parameters
 
-Parameters are specified via a JSON array, and are broadly similar to inputs and outputs. Here's an example of the parameter we will define allowing users to specify how much RAM to use in a "samtools sort" operation.
+Parameters are specified in a JSON array, and are broadly similar to inputs and outputs. Here's an example of the parameter we will define allowing users to specify how much RAM to use in a "samtools sort" operation.
 
 ```json
     {"id":"maxMemSort",
@@ -301,8 +316,10 @@ Parameters are specified via a JSON array, and are broadly similar to inputs and
 | details.argument | | string | The command-line argument associated with specifying this parameter at run time |
 | details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated |
 
-### Notes
+### Tools and Utilities
 1. If you're used to Perl regex, Java expressions have slightly different syntax. To test out your validation expressions, you can use a handy tool at [RegexPlanet](http://www.regexplanet.com/advanced/java/index.html).
+2. Stumped for ontology terms to apply to your Agave app inputs, outputs, and parameters? SSWAPmeet has many URI-format terms for [MIME](http://sswapmeet.sswap.info/mime/) types, and BioPortal can provide links to [EDAM](http://bioportal.bioontology.org/ontologies/EDAM). 
+3. Need to validate JSON files? Try [JSONlint](http://jsonlint.com/) or [JSONparser](http://json.parser.online.fr/)
 
 Create a template script
 ------------------------
@@ -313,8 +330,6 @@ cp test-sort.sh sort.template
 ```
 
 Now, open template.slurm in the text editor of your choice. Delete the bash shebang line and the SLURM pragmas. Replace the hard-coded values for inputs and parameters with variables defined by your app description.
-
-_NOTE TO SELF: Add comments and update script to illustrate use of Agave parameter passing function_
 
 ```sh
 # Set up inputs...
@@ -402,7 +417,7 @@ apps-list -S stampede.tacc.utexas.edu
 apps-list --privateonly
 ```
 
-You should see *samtools-sort-0.1.19* in "apps-list" and "apps-list --privateonly" but not "apps-list -S stampede.tacc.utexas.edu". Why do you think this is the case? Give up? It's because the app "samtools-sort-0.1.19" is not registered to the public iPlant-maintained executionSystem called "stampede.tacc.utexas.edu"
+You should see *samtools-sort-0.1.19* in "apps-list" and "apps-list --privateonly" but not "apps-list -S stampede.tacc.utexas.edu". Why do you think this is the case? Give up? It's because the app "samtools-sort-0.1.19" is not registered to the public iPlant-maintained executionSystem called "stampede.tacc.utexas.edu" and so is filtered from display. 
 
 You can print a detailed view, in JSON format, of the app description to your screen:
 
