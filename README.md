@@ -25,3 +25,6 @@ We have assembled this software development kit with an eye towards developers a
 * [Setting up your own systems]
 * [Cloning an iPlant application to your own systems](docs/iplant-clone-app.md)
 * [Advanced app authoring with Launcher]
+
+### Reporting errors and getting help
+Feel free to drop by the [Service Desk](https://pods.iplantcollaborative.org/jira/servicedesk/customer/sciapi) to report issues, or visit the [Ask iPlant](http://ask.iplantcollaborative.org/questions/) forums for in-depth help. 
