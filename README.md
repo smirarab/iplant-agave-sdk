@@ -26,5 +26,5 @@ We have assembled this software development kit with an eye towards developers a
 
 *Additional Guides*
 * [Setting up your own systems]
-* [Creating an iPlant application on your own systems]
+* [Cloning an iPlant application to your own systems](docs/iplant-clone-app.md)
 * [Advanced app authoring with Launcher]
