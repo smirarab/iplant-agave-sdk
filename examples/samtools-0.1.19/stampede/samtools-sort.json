@@ -27,7 +27,7 @@
         {"default":"",
          "order":0,
          "required":true,
-         "validator":"",
+         "validator":".bam$",
          "visible":true},
      "semantics":
         {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],
@@ -52,7 +52,7 @@
      "details":
         {"description":null,
          "label":"Maxiumum memory in bytes, used for sorting",
-         "argument":"-m",
+         "argument":"-m ",
          "showArgument":false}},
     {"id":"nameSort",
      "value":
@@ -67,7 +67,7 @@
      "details":
         {"description":null,
          "label":"Sort by name rather than coordinate",
-         "argument":"-n",
+         "argument":"-n ",
          "showArgument":false}}],
  "outputs":[
     {"id":"bam",
@@ -75,7 +75,7 @@
         {"default":"sorted.bam",
          "order":0,
          "required":false,
-         "validator":"",
+         "validator":"sorted.bam$",
          "visible":true},
      "semantics":
         {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],

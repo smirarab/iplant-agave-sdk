@@ -3,7 +3,7 @@
 # command line later, these will be marked as required
 inputBam=${inputBam}
 # and parameters
-outputPrefix=${outputPrefix}
+outputPrefix="sorted"
 # Maximum memory for sort, in bytes
 # Be careful, Neither Agave nor scheduler will
 # check that this is a reasonable value. In production
