@@ -60,7 +60,6 @@ RUNNING
 Agave V2 features some handy new features to help you diagnose performance and completion issues with your jobs:
 
 1. If you are running on your private executionSystem, you can log into the system (see above) and watch the job progress. This is incredibly valuable.
-
 2. Once your job is submitted into the system, you can run jobs-history $JOBID and get a report back.
 ```sh
 # Example jobs-history
@@ -76,13 +75,11 @@ HPC job successfully placed into queue
 Job started running
 Job completed. Skipping archiving at user request.
 ```
-
 3. You can list the output of your job, whether it runs to completion or not
 ```sh
 # Example jobs-output
 jobs-output 0001397239178196-5056a550b8-0001-007
 .agave.archive
-0
 bin.tgz
 ex1.bam
 samtools-sort-01-0001397239178196-5056a550b8-0001-007.err
@@ -94,12 +91,10 @@ sorted.bam
 test
 test-sort.sh
 ```
-
 4. You can download specific files, for example the *ipcexe job file
 ```sh
 jobs-output --download --path samtools-sort-01.ipcexe 0001397239178196-5056a550b8-0001-007 
 ```
-
 5. You can get more detailed outputs from any of the foundation-cli commands by adding -v to your command line to output the JSON response, and/or by adding -V which will print STDERR to your screen.
 
 [Back to READ ME](../README.md) | [Next: Sharing your Agave app with others](iplant-share-app.md)
