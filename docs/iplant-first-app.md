@@ -1,23 +1,38 @@
 Creating an iPlant application for TACC Stampede
 ================================================
-Agave API apps have a generalized structure that allows them to carry dependencies around with them. In the case below, _package-name-version.dot.dot_ is a folder that you build on your local system, then store in the iPlant Data Store in a designated location (we recommend /iplant/home/USERNAME/applications). It contains binaries, support scripts, test data, etc. all in one package. Agave basically uses a very rough form of containerized applications (more on this later). Thus, all apps should look something like the following, no matter what code you are working to deploy:
+
+We will now go through the process of building and deploying an Agave application to provide 'samtools sort' functionality on TACC's Stampede system. The following tutorial assumes you have properly installed and configured the iPlant SDK on Stampede. They assume you have defined an environment variable IPLANTUSERNAME as your iPlant username.
+
+Agave application packaging
+---------------------------
+Agave API apps have a generalized structure that allows them to carry dependencies around with them. In the case below, _package-name-version.dot.dot_ is a folder that you build on your local system, then store in the iPlant Data Store in a designated location (we recommend /iplant/home/IPLANTUSERNAME/applications/APPFOLDER). It contains binaries, support scripts, test data, etc. all in one package. Agave basically uses a very rough form of containerized applications (more on this later). We suggest you set your apps up to look something like the following:
 
 ```sh
 package-name-version.dot.dot
 |--system_name
 |----bin.tgz (optional)
+|----lib.tgz (optional)
+|----include.tgz (optional)
 |----test.sh
 |----script.template
 |----test_data (optional)
 |----app.json
 ```
 
-When a job is executed, this bundle of files is staged into place in a temporary directory on the target executionSystem. Then, the input data files (we'll show you how to specify those are later) are staged into place automatically. Next, Agave writes a scheduler submit script (using a template you provide i.e. script.template) and puts it in the queue on the target system. The Agave service then monitor progress of the job and, assuming it completes, copies all newly-created files to the location specified when the job was submitted. Along the way, critical milestones and metadata are recorded in the job's history. 
+Agave runs a job by first transferring a copy of this directory into temporary directory on the target executionSystem. Then, the input data files (we'll show you how to specify those are later) are staged into place automatically. Next, Agave writes a scheduler submit script (using a template you provide i.e. script.template) and puts it in the queue on the target system. The Agave service then monitors progress of the job and, assuming it completes, copies all newly-created files to the location specified when the job was submitted. Along the way, critical milestones and metadata are recorded in the job's history. 
 
-Create an application bundle
-----------------------------
-We will now go through the process of building and deploying an Agave application to provide 'samtools sort' functionality on the Stampede system. The following steps assume you have properly installed and configured the iPlant SDK on Stampede. They assume you have defined an environment variable IPLANTUSERNAME as your iPlant username.
+*Agave app development proceeds via the following steps:*
+1. Build the application locally on the executionSystem
+2. Ensure that you are able to run it directly on the executionSystem
+3. Describe the application using an Agave app description
+4. Create a shell template for running the app
+5. Upload the application directory to a storageSystem
+6. Post the app description to the Agave apps service
+7. Debug your app by running jobs and updating the app until it works as intended
+8. (Optional) Share the app with some friends to let them test it
 
+Build a samtools application bundle
+------------------------------------
 ```sh
 # Log into Stampede and set up a project directory
 ssh stampede.tacc.utexas.edu
@@ -55,8 +70,8 @@ Command: view        SAM<->BAM conversion
 # can adopt a similar approach with lib and include.
 tar -czf bin.tgz bin && rm -rf bin
 ```
-Create a test script
---------------------
+Run samtools sort locally
+-------------------------
 Your first objective is to create a script that you know will run to completion under the Stampede scheduler and environment (or whatever executionSystem you're working on). It will serve as a model for the template file you create later. In our case, we need to write a script that can be submitted to the Slurm scheduler. The standard is to use Bash for such scripts. You have five main objectives in your script:
 * Unpack binaries from bin.tgz
 * Extend your PATH to contain bin
@@ -137,8 +152,8 @@ sbatch test-sort.sh
 ```
 Assuming all goes according to plan, you'll end up with a sorted BAM called *sorted.bam*, and your bin directory (but not the bin.tgz file) should be erased. Congratulations, you're in the home stretch: it's time to turn the test script into an Agave app.
 
-Creating an application description
------------------------------------
+Craft an Agave app description 
+-------------------------------
 In order for Agave to know how to run an instance of the application, we need to provide quite a bit of metadata about the application. This includes a unique name and version, the location of the application bundle, the identities of the execution system and destination system for results, whether its an HPC or other kind of job, the default number of processors and memory it needs to run, and of course, all the inputs and parameters for the actual program. It seems a bit over-complicated, but only because you're comfortable with the command line already. Your goal here is to allow your applications to be portable across systems and present a web-enabled, rationalized interface for your code to consumers.
 
 Rather than have you write a description for "samtools sort" from scratch, let's systematically dissect an existing file provided with the SDK. Go ahead and copy the file into place and open it in your text editor of choice. If you don't have the SDK installed, you can [grab it here](../examples/samtools-0.1.19/stampede/samtools-sort.json).
@@ -321,8 +336,8 @@ Parameters are specified in a JSON array, and are broadly similar to inputs and 
 2. Stumped for ontology terms to apply to your Agave app inputs, outputs, and parameters? SSWAPmeet has many URI-format terms for [MIME](http://sswapmeet.sswap.info/mime/) types, and BioPortal can provide links to [EDAM](http://bioportal.bioontology.org/ontologies/EDAM). 
 3. Need to validate JSON files? Try [JSONlint](http://jsonlint.com/) or [JSONparser](http://json.parser.online.fr/)
 
-Create a template script
-------------------------
+Craft a shell script template
+-----------------------------
 Make a copy of your test-sort.sh script, so you can refer back to it later.
 
 ```sh
@@ -366,8 +381,8 @@ samtools sort ${ARGS} $inputBam ${outputPrefix}
 # Now, delete the bin/ directory
 rm -rf bin
 ```
-### Uploading the application bundle
-
+Upload the app bundle to a storageSystem
+----------------------------------------
 Each time you (or another user) requests an instance of samtools sort, Agave copies data from a "deploymentPath" on a "storageSystem" as part of creating the temporary working directory on an "executionSystem". Now that you've crafted the application bundle's dependencies and script template, it's time to store it somewhere accessible by Agave. 
 
 *Note* If you've never deployed an Agave-based app, you may not have an applications directory in your home folder. Since this is where we recommend you store the apps, create one.
@@ -388,8 +403,8 @@ files-upload -S data.iplantcollaborative.org -F samtools-0.1.19 $IPLANTUSERNAME/
 ```
 Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave creates a job using this application, it will stage the updated version of the application bundle into place on the executionSystem and it to complete your task.
 
-Submit your app description
----------------------------
+Post the app description to Agave
+---------------------------------
 
 ```sh
 apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json
