@@ -81,7 +81,7 @@ a.out ${inputFile} $ARGS > stdout.txt
         {"default":false,
          "order":1,
          "required":false,
-         "type":"bool",
+         "type":"flag",
          "validator":"",
          "visible":true},
      "semantics":
