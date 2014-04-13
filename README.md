@@ -13,6 +13,7 @@ In January 2014, version 2 of the iPlant-developed [Agave API](http://agaveapi.c
 We have assembled this software development kit with an eye towards developers affiliated with the iPlant Collaborative who are developing scientific applications for use by other users via the graphical Discovery Environment workbench, third party workbench systems, or personal integrations with the Agave SaaS API. With a little tweaking, 90% of the documentation here is generally applicable to using Agave in your own organization.
 
 *Guide to App Development at iPlant*
+* [Initial assumptions](docs/iplant-assumptions.md)
 * [Installing the SDK](docs/install-sdk.md)
 * [Creating an OAuth2 client and getting a set of keys](docs/client-create.md)
 * [Obtaining an OAuth 2 authentication token](docs/set-token.md)
