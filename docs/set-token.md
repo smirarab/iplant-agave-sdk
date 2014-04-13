@@ -2,7 +2,7 @@ Obtaining an OAuth 2 authentication token
 =========================================
 In order to interact with iPlant Science API services, you will need to acquire a authentication token, which is tied to the client application you have created. The command for accomplishing this is:
 ```sh
-# From your terminal interface, _type_:
+# From your terminal interface, type:
 auth-tokens-create -S -v
 ```
 * You will first be prompted to enter your *Consumer Secret*. Copy your consumerSecret from before, when you created a client application, and paste it in your terminal interface where prompted.
