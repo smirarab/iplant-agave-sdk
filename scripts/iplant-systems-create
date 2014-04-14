@@ -54,11 +54,11 @@ BN=$(basename $F .jsonx)
 cp $F "$BN.json" && chmod 600 $BN.json
 echo "$BN.json"
 # Find and replace on Macros
-sed "s/%USERNAME/$USERNAME/g" "$BN.json"
-sed "s/%PROJECT/$PROJECT/g" "$BN.json"
-sed "s/%PASSWORD/$PASSWORD/g" "$BN.json"
-sed "s/%DATESTAMP/$DATESTAMP/g" "$BN.json"
-sed "s|%WORK|$WORKD|g" "$BN.json"
+sed -i "s/%USERNAME/$USERNAME/g" "$BN.json"
+sed -i "s/%PROJECT/$PROJECT/g" "$BN.json"
+sed -i "s/%PASSWORD/$PASSWORD/g" "$BN.json"
+sed -i "s/%DATESTAMP/$DATESTAMP/g" "$BN.json"
+sed -i "s|%WORK|$WORKD|g" "$BN.json"
 echo "Enrolling private system $BN"
 systems-addupdate -F "$BN.json"
 done
