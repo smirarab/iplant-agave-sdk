@@ -9,7 +9,7 @@ set -e
 auth-tokens-create -S
 sleep 2
 
-IPLANT_SDK_HOME="/Users/mwvaughn/agave2-mar-2014/iplant-agave-sdk"
+#IPLANT_SDK_HOME="/Users/mwvaughn/agave2-mar-2014/iplant-agave-sdk"
 
 echo "We will now configuring TACC-managed systems and need some info from you"
 echo -e "\tTACC username"
