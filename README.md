@@ -6,7 +6,7 @@ In January 2014, version 2 of the iPlant-developed [Agave API](http://agaveapi.c
 * the ability to enroll your own computing and storage resources
 * notifications via sophisticated callbacks
 * job dependencies
-* automated, asychronous data staging
+* automated, asynchronous data staging
 * online support tools for app creation
 * live documentation
 
