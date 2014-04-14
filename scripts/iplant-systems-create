@@ -1,5 +1,16 @@
 #!/bin/bash
 
+darwin=false;
+case "`uname`" in
+  Darwin*) darwin=true ;;
+esac
+
+if $darwin; then
+  sedi="sed -i ''"
+else
+  sedi="sed -i"
+fi
+
 echo "We are going to create and enroll personal copies of various HPC systems"
 echo "used by iPlant staff developers to build apps."
 echo "The following assumes you have created an Agave client via client-create."
@@ -54,11 +65,11 @@ BN=$(basename $F .jsonx)
 cp $F "$BN.json" && chmod 600 $BN.json
 echo "$BN.json"
 # Find and replace on Macros
-sed "s/%USERNAME/$USERNAME/g" "$BN.json"
-sed "s/%PROJECT/$PROJECT/g" "$BN.json"
-sed "s/%PASSWORD/$PASSWORD/g" "$BN.json"
-sed "s/%DATESTAMP/$DATESTAMP/g" "$BN.json"
-sed "s|%WORK|$WORKD|g" "$BN.json"
+$sedi "s/%USERNAME/$USERNAME/g" "$BN.json"
+$sedi "s/%PROJECT/$PROJECT/g" "$BN.json"
+$sedi "s/%PASSWORD/$PASSWORD/g" "$BN.json"
+$sedi "s/%DATESTAMP/$DATESTAMP/g" "$BN.json"
+$sedi "s|%WORK|$WORKD|g" "$BN.json"
 echo "Enrolling private system $BN"
 systems-addupdate -F "$BN.json"
 done
