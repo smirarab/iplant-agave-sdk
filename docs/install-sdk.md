@@ -13,9 +13,9 @@ module load git
 # Clone the SDK repository (note the --recursive flag):
 git clone https://github.com/iPlantCollaborativeOpenSource/iplant-agave-sdk.git --recursive
 # Add SDK scripts to your PATH:
-echo "IPLANT_SDK_HOME=$PWD/iplant-agave-sdk" >> ~/.profile
+echo "export IPLANT_SDK_HOME=$PWD/iplant-agave-sdk" >> ~/.profile
 echo "PATH=\$PATH:\$IPLANT_SDK_HOME/scripts:" >> ~/.profile
-echo "PATH=\$PATH:\$IPLANT_SDK_HOME/foundation-cli/bin" >> ~/.profile
+echo "export PATH=\$PATH:\$IPLANT_SDK_HOME/foundation-cli/bin" >> ~/.profile
 # To re-init bash _type_:
 source ~/.profile
 ```
