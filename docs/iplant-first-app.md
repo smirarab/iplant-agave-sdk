@@ -165,7 +165,11 @@ Open up samtools-sort.json in a text editor or [in your web browser](../examples
 
 ### Overview
 
-Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. *To make this file work for you, you will at minimum need to edit its executionSystem to match your private instance of Stampede*.
+Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. 
+
+*To make this file work for you, you will to, at minimum, edit:*
+1. Its executionSystem to match your private instance of Stampede*.
+2. The name of the app to something besides "samtools-sort". We recommend "$IPLANTUSERNAME-samtools-sort". 
 
 All Agave application descriptions have the following structure:
 
@@ -196,7 +200,7 @@ There is a defined list of application metadata fields, some of which are mandat
 | label | X | string | Human-readable title for the app |
 | longDescription | | string | A short paragraph describing the functionality of the app |
 | modules | | array[string] | Ordered list of modules on systems that use lmod or modules |
-| name | X | string | unique URL-compatible (no special chars or spaces) name for the app |
+| name | X | string | unique, URL-compatible (no special chars or spaces) name for the app |
 | ontology | X | array[string] | List of ontology terms (or URIs pointing to ontology terms) associated with the app |
 | parallelism | X | serial|parallel | Is your application capable of using more than a single compute node? |
 | shortDescription | X | string | Brief description of the app |
@@ -205,6 +209,8 @@ There is a defined list of application metadata fields, some of which are mandat
 | templatePath | X | string | Path to the shell template file, relative to deploymentPath |
 | testPath | X | string | Path to the shell test file, relative to deploymentPath |
 | version | X | string | Preferred format: Major.minor.point integer values for app |
+
+* Note *: The combination of *name* and *version* must be unique the entire iPlant API namespace. 
 
 ### Inputs
 
@@ -381,7 +387,7 @@ samtools sort ${ARGS} $inputBam ${outputPrefix}
 # Now, delete the bin/ directory
 rm -rf bin
 ```
-Upload the app bundle to a storageSystem
+Storing an app bundle on a storageSystem
 ----------------------------------------
 Each time you (or another user) requests an instance of samtools sort, Agave copies data from a "deploymentPath" on a "storageSystem" as part of creating the temporary working directory on an "executionSystem". Now that you've crafted the application bundle's dependencies and script template, it's time to store it somewhere accessible by Agave. 
 
@@ -394,21 +400,26 @@ files-list -S data.iplantcollaborative.org $IPLANTUSERNAME/applications
 files-mkdir -S data.iplantcollaborative.org -N "applications" $IPLANTUSERNAME/
 ```
 
-Now, upload the application bundle:
+Now, go ahead with the upload:
 ```sh
 # cd out of the bundle
 cd $WORK/iPlant
 # Upload using files-upload
 files-upload -S data.iplantcollaborative.org -F samtools-0.1.19 $IPLANTUSERNAME/applications
 ```
-Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave creates a job using this application, it will stage the updated version of the application bundle into place on the executionSystem and it to complete your task.
 
 Post the app description to Agave
 ---------------------------------
 
+Edit the samtools-sort.json file to change the *executionSystem* to your private Stampede system and the *name* to something besides *samtools-sort* (i.e. $IPLANTUSERNAME-samtools-sort), then post the JSON file to Agave's app service.
+
 ```sh
 apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json
 ```
+
+*Note*: If you see this error "Permission denied. An application with this unique id already exists and you do not have permission to update this application. Please either change your application name or update the version number", you forgot to change the name or the name you chose conflicts with another Agave application. Change it again in the JSON file and resubmit. 
+
+### Updating your application metadata or bundle
 
 Any time you need to update the metadata description of your non-public application, you can just make the changes locally to the JSON file and and re-post it. The next time Agave creates a job using this application, it will use the new description.
 
@@ -418,26 +429,28 @@ apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json samtools-sort-0.1.
 
 The field *samtools-sort-0.1.19* at the end is the appid you're updating. Agave tries to guess from the JSON file but to remove uncertainty, we recommend always specifying it explicitly. 
 
-Verify your app description
----------------------------
+Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave creates a job using this application, it will stage the updated version of the application bundle into place on the executionSystem and it to complete your task. It's a little more complicated to deal with fully public apps, and so we'll cover that in a separate document. 
 
-First, you can check to see if your new application shows up in the bulk listing:
+Verify your new app description
+-------------------------------
+
+First, you may check to see if your new application shows up in the bulk listing:
 
 ```sh
-# Shows all apps - public, private, or shared with you
+# Shows all apps that are public, private to you, or shared with you
 apps-list 
-# Show all apps on a specific system
+# Show all apps on a specific system that are public, private to you, or shared with you
 apps-list -S stampede.tacc.utexas.edu
-# Show private apps
+# Show only your private apps
 apps-list --privateonly
 ```
 
-You should see *samtools-sort-0.1.19* in "apps-list" and "apps-list --privateonly" but not "apps-list -S stampede.tacc.utexas.edu". Why do you think this is the case? Give up? It's because the app "samtools-sort-0.1.19" is not registered to the public iPlant-maintained executionSystem called "stampede.tacc.utexas.edu" and so is filtered from display. 
+You should see *your new app ID* in "apps-list" and "apps-list --privateonly" but not "apps-list -S stampede.tacc.utexas.edu". Why do you think this is the case? Give up? It's because your new app is not registered to the public iPlant-maintained executionSystem called "stampede.tacc.utexas.edu" and so is filtered from display. 
 
-You can print a detailed view, in JSON format, of the app description to your screen:
+You can print a detailed view, in JSON format, of any app description to your screen:
 
 ```sh
-apps-list -v samtools-sort-0.1.19
+apps-list -v APP_ID
 ```
 
 Take some time to review how the app description looks when printed from app-list relative to how it looked as a JSON file in your text editor. There are likely some additional fields present (generated by the Agave service) and the presentation may differ from your expectation. Understanding the relationship between what the service returns and the input data structure is crucial for being able to debug effectively.

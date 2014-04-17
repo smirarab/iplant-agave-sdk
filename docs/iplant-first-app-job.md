@@ -1,13 +1,13 @@
 Running a job with Agave
 ========================
 
-Agave is a RESTFUL API, and as such, is meant to be interacted with via web applications or software libraries. However, you can easily run jobs by posting a properly configured JSON to the apps service. We will now go through the details of running an instance of the samtools-sort-0.1.19 app registered in the development tutorial. Go ahead and copy the example samtools-sort job to a local directory. You won't need to edit it assuming you have an application available named samtools-sort-0.1.19, but you may want to have it as a reference or edit some of its parameters. 
+Agave is a RESTFUL API, and as such, is meant to be interacted with via web applications or software libraries. However, you can easily run jobs by posting a properly configured JSON to the apps service. We will now go through the details of running an instance of the samtools-sort-0.1.19 app registered in the development tutorial. Go ahead and copy the example samtools-sort job to a local directory. You will need edit this file to change the *softwareName* from *samtools-sort-0.1.19* to the APP_ID you created when you registered your own samtools-sort app. 
 
 ```sh
 cp $IPLANT_HOME_SDK/examples/samtools-sort-job.json .
 ```
 
-You can open it in a text editor, or follow along here as we dissect the elements of an Agave job specification.
+Follow along in the file as we dissect the elements of an Agave job specification:
 
 ```json
 {
@@ -43,7 +43,9 @@ You can open it in a text editor, or follow along here as we dissect the element
 | archivePath | | string | If archive=true, specifies the path relative to homeDir on your tenant default storageSystem to which result files will be copied |
 
 ```sh
-# Submit the job for Agave to execute. Here's a log from an example run
+# Submit the job for Agave to execute. Don't forget to edit softwareName before
+# do this or you will get a pesky error saying you don't have access to samtools-sort-0.1.19
+# Here's a log from an example run
 jobs-submit -F samtools-sort-job.json
 Successfully submitted job 0001397239178196-5056a550b8-0001-007
 
@@ -95,6 +97,6 @@ test-sort.sh
 ```sh
 jobs-output --download --path samtools-sort-01.ipcexe 0001397239178196-5056a550b8-0001-007 
 ```
-* You can get more detailed outputs from any of the foundation-cli commands by adding -v to your command line to output the JSON response, and/or by adding -V which will print STDERR to your screen.
+* You can get more detailed outputs from any of the Agave CLI commands by adding -v to your command line to output the JSON response, and/or by adding -V which will print STDERR to your screen.
 
 [Back to READ ME](../README.md) | [Next: Sharing your Agave app with others](iplant-share-app.md)
