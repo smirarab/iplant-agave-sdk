@@ -167,7 +167,7 @@ Open up samtools-sort.json in a text editor or [in your web browser](../examples
 
 Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. 
 
-*To make this file work for you, you will to, at minimum, edit:*
+*To make this file work for you, you will need to, at minimum, edit:*
 
 1. Its executionSystem to match your private instance of Stampede*.
 2. The name of the app to something besides "samtools-sort". We recommend "$IPLANTUSERNAME-samtools-sort". 
