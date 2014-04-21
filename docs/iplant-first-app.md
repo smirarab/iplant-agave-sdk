@@ -22,6 +22,7 @@ package-name-version.dot.dot
 Agave runs a job by first transferring a copy of this directory into temporary directory on the target executionSystem. Then, the input data files (we'll show you how to specify those are later) are staged into place automatically. Next, Agave writes a scheduler submit script (using a template you provide i.e. script.template) and puts it in the queue on the target system. The Agave service then monitors progress of the job and, assuming it completes, copies all newly-created files to the location specified when the job was submitted. Along the way, critical milestones and metadata are recorded in the job's history. 
 
 *Agave app development proceeds via the following steps:*
+
 1. Build the application locally on the executionSystem
 2. Ensure that you are able to run it directly on the executionSystem
 3. Describe the application using an Agave app description
