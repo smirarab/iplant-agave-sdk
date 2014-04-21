@@ -4,7 +4,7 @@ Running a job with Agave
 Agave is a RESTFUL API, and as such, is meant to be interacted with via web applications or software libraries. However, you can easily run jobs by posting a properly configured JSON to the apps service. We will now go through the details of running an instance of the samtools-sort-0.1.19 app registered in the development tutorial. Go ahead and copy the example samtools-sort job to a local directory. You will need edit this file to change the *softwareName* from *samtools-sort-0.1.19* to the APP_ID you created when you registered your own samtools-sort app. 
 
 ```sh
-cp $IPLANT_HOME_SDK/examples/samtools-sort-job.json .
+cp $IPLANT_SDK_HOME/examples/samtools-sort-job.json .
 ```
 
 Follow along in the file as we dissect the elements of an Agave job specification:
