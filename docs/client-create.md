@@ -8,7 +8,7 @@ clients-create -S -v -N my_client -D "Client used for app development"
 
 *Note:* The -N flag allows you to specify a machine-readable name for your application; -D provides the description, and -S option stores your API keys for future use, so you will not need to manually enter them when you authenticate later.
 
-You should get a response from clients-create that looks similar to this:
+After being prompted for your iPlant username and password, you should get a response from clients-create that looks similar to this:
 ```json
 {
     "_links": {
