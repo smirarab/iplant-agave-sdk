@@ -37,15 +37,19 @@ Build a samtools application bundle
 ```sh
 # Log into Stampede 
 ssh stampede.tacc.utexas.edu
-# Unload systems samtools module if it happens to be loaded by default
+
+# Unload system's samtools module if it happens to be loaded by default
 module unload samtools
+
 # All TACC systems have a directory than can be accessed as $WORK
 cd $WORK
+
 # Set up a project directory
 mkdir iPlant
 mkdir iPlant/src
 mkdir -p iPlant/samtools-0.1.19/stampede/bin
 mkdir -p iPlant/samtools-0.1.19/stampede/test
+
 # Build samtools using the Intel C Compiler
 # If you don't have icc, gcc will work but icc usually gives more efficient binaries
 cd iPlant/src
@@ -53,20 +57,23 @@ wget "http://downloads.sourceforge.net/project/samtools/samtools/0.1.19/samtools
 tar -jxvf samtools-0.1.19.tar.bz2
 cd samtools-0.1.19
 make CC=icc
+
 # Copy the samtools binary and support scripts to the project bin directory
 cp -R samtools bcftools misc ../../samtools-0.1.19/stampede/bin/
 cd ../../samtools-0.1.19/stampede
+
 # Test that samtools will launch
 bin/samtools
 
-Program: samtools (Tools for alignments in the SAM format)
-Version: 0.1.19-44428cd
+	Program: samtools (Tools for alignments in the SAM format)
+	Version: 0.1.19-44428cd
+	
+	Usage:   samtools <command> [options]
+	
+	Command: view        SAM<->BAM conversion
+	         sort        sort alignment file
+	         mpileup     multi-way pileup...
 
-Usage:   samtools <command> [options]
-
-Command: view        SAM<->BAM conversion
-         sort        sort alignment file
-         mpileup     multi-way pileup...
 # Package up the bin directory as an compressed archive 
 # and remove the original. This preserves the execute bit
 # and other permissions and consolidates movement of all
@@ -74,6 +81,7 @@ Command: view        SAM<->BAM conversion
 # can adopt a similar approach with lib and include.
 tar -czf bin.tgz bin && rm -rf bin
 ```
+
 Run samtools sort locally
 -------------------------
 Your first objective is to create a script that you know will run to completion under the Stampede scheduler and environment (or whatever executionSystem you're working on). It will serve as a model for the template file you create later. In our case, we need to write a script that can be submitted to the Slurm scheduler. The standard is to use Bash for such scripts. You have five main objectives in your script:
@@ -83,9 +91,9 @@ Your first objective is to create a script that you know will run to completion 
 * Craft a command line invocation of the application you will run
 * Clean up when you're done
 
-First, you will need some test data in your working directory. You can use a test file
+First, you will need some test data in your current directory (i.e., $WORK/iPlant/samtools-0.1.19/stampede/ ). You can use this test file
 ```sh
-files-get -S data.iplantcollaborative.org shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam
+files-get -S data.iplantcollaborative.org /shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam
 ```
 or you can any other BAM file for your testing purposes. Make sure if you use another file to change the filename in your test script accordingly!
 
@@ -152,7 +160,12 @@ rm -rf bin
 ```
 ### Submit the job to the queue on Stampede...
 ```sh
+chmod 700 test-sort.sh 
 sbatch test-sort.sh 
+```
+You can monitor your jobs in the queue using 
+```sh
+showq -u your_tacc_username
 ```
 Assuming all goes according to plan, you'll end up with a sorted BAM called *sorted.bam*, and your bin directory (but not the bin.tgz file) should be erased. Congratulations, you're in the home stretch: it's time to turn the test script into an Agave app.
 
