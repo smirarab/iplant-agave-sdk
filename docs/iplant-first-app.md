@@ -207,8 +207,8 @@ There is a defined list of application metadata fields, some of which are mandat
 | ----- | --------- | ---- | ----------- |
 | checkpointable | X | boolean | Application supports checkpointing |
 | defaultMemoryPerNode | | integer | Default RAM (GB) to request per compute node |
-| defaultProcessorsPerNode | | integer | Default RAM (GB) to request per compute node |
-| defaultMaxRunTime | | integer | Default RAM (GB) to request per compute node |
+| defaultProcessorsPerNode | | integer | Default processor count to request per compute node |
+| defaultMaxRunTime | | integer | Default maximum run time (hours:minutes:seconds) to request per compute node |
 | defaultNodeCount | | integer | Default number of compute nodes per job |
 | defaultQueue | | string | On HPC systems, default batch queue for jobs |
 | deploymentPath | X | string | Path relative to homeDir on deploymentSystem where application bundle will reside |
@@ -220,7 +220,7 @@ There is a defined list of application metadata fields, some of which are mandat
 | modules | | array[string] | Ordered list of modules on systems that use lmod or modules |
 | name | X | string | unique, URL-compatible (no special chars or spaces) name for the app |
 | ontology | X | array[string] | List of ontology terms (or URIs pointing to ontology terms) associated with the app |
-| parallelism | X | serial|parallel | Is your application capable of using more than a single compute node? |
+| parallelism | X | string | Is your application capable of using more than a single compute node? (SERIAL or PARALLEL) |
 | shortDescription | X | string | Brief description of the app |
 | storageSystem | X | string | The Agave-registered STORAGE system upon which you have write permissions. Default source of and destination for data consumed and emitted by the app |
 | tags | | array[string] | List of human-readable tags for the app |
