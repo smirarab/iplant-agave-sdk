@@ -35,10 +35,13 @@ Agave runs a job by first transferring a copy of this directory into temporary d
 Build a samtools application bundle
 ------------------------------------
 ```sh
-# Log into Stampede and set up a project directory
+# Log into Stampede 
 ssh stampede.tacc.utexas.edu
+# Unload systems samtools module if it happens to be loaded by default
+module unload samtools
 # All TACC systems have a directory than can be accessed as $WORK
 cd $WORK
+# Set up a project directory
 mkdir iPlant
 mkdir iPlant/src
 mkdir -p iPlant/samtools-0.1.19/stampede/bin
