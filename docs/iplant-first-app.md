@@ -184,10 +184,13 @@ Open up samtools-sort.json in a text editor or [in your web browser](../examples
 
 Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. 
 
-*To make this file work for you, you will need to, at minimum, edit:*
+To make this file work for you, you will be, at a minimum, editting:
 
-1. Its executionSystem to match your private instance of Stampede*.
-2. The name of the app to something besides "samtools-sort". We recommend "$IPLANTUSERNAME-samtools-sort". 
+1. Its *executionSystem* to match your private instance of Stampede.
+2. Its *deploymentPath* to match your iPlant applications path
+3. The *name* of the app to something besides "samtools-sort". We recommend "$IPLANTUSERNAME-samtools-sort". 
+
+Instructions for making these changes will follow.
 
 All Agave application descriptions have the following structure:
 
@@ -368,7 +371,7 @@ Make a copy of your test-sort.sh script, so you can refer back to it later.
 cp test-sort.sh sort.template
 ```
 
-Now, open template.slurm in the text editor of your choice. Delete the bash shebang line and the SLURM pragmas. Replace the hard-coded values for inputs and parameters with variables defined by your app description.
+Now, open test-sort.sh in the text editor of your choice. Delete the bash shebang line and the SLURM pragmas. Replace the hard-coded values for inputs and parameters with variables defined by your app description.
 
 ```sh
 # Set up inputs...
@@ -429,8 +432,12 @@ files-upload -S data.iplantcollaborative.org -F samtools-0.1.19 $IPLANTUSERNAME/
 Post the app description to Agave
 ---------------------------------
 
-Edit the samtools-sort.json file to change the *executionSystem* to your private Stampede system and the *name* to something besides *samtools-sort* (i.e. $IPLANTUSERNAME-samtools-sort), then post the JSON file to Agave's app service.
+As mentioned in the overview, several personalizations to samtools-sort.json are required.  Specifically, edit the samtools-sort.json file to change:
+* the *executionSystem* to your private Stampede system, 
+* the *deploymentPath* to your own iPlant applications directory for samtools
+* the *name* to *$IPLANTUSERNAME-samtools-sort*
 
+Post the JSON file to Agave's app service.
 ```sh
 apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json
 ```
@@ -442,10 +449,10 @@ apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json
 Any time you need to update the metadata description of your non-public application, you can just make the changes locally to the JSON file and and re-post it. The next time Agave creates a job using this application, it will use the new description.
 
 ```sh
-apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json samtools-sort-0.1.19
+apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json $IPLANTUSERNAME-samtools-sort-0.1.19
 ```
 
-The field *samtools-sort-0.1.19* at the end is the appid you're updating. Agave tries to guess from the JSON file but to remove uncertainty, we recommend always specifying it explicitly. 
+The field *$IPLANTUSERNAME-samtools-sort-0.1.19* at the end is the appid you're updating. Agave tries to guess from the JSON file but to remove uncertainty, we recommend always specifying it explicitly. 
 
 Any time you need to update the binaries, libraries, templates, etc. in your non-public application, you can just make the changes locally and re-upload the bundle. The next time Agave creates a job using this application, it will stage the updated version of the application bundle into place on the executionSystem and it to complete your task. It's a little more complicated to deal with fully public apps, and so we'll cover that in a separate document. 
 
