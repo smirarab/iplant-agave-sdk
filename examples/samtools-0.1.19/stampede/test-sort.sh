@@ -36,10 +36,10 @@ export PATH=$PATH:"$PWD/bin"
 # Start with empty ARGS...
 ARGS=""
 # Add -m flag if maxMemSort was specified
-if [ ${maxMemSort} > 0 ]; then ARGS="${ARGS} -m $maxMemSort"; fi
-ARGS="-m $maxMemSort"
+if [ ${maxMemSort} -gt 0 ]; then ARGS="${ARGS} -m $maxMemSort"; fi
+
 # Boolean handler for -named sort
-if [ ${nameSort} == 1 ]; then ARGS="${ARGS} -n "; fi
+if [ ${nameSort} -eq 1 ]; then ARGS="${ARGS} -n "; fi
  
 # Run the actual program
 samtools sort ${ARGS} $inputBam ${outputPrefix}
