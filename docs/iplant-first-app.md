@@ -148,7 +148,7 @@ ARGS=""
 # You might want to add a constraint for how large maxMemSort
 # can be based on the available memory on your executionSystem
 if [ ${maxMemSort} > 0 ]; then ARGS="${ARGS} -m $maxMemSort"; fi
-ARGS="-m $maxMemSort"
+
 # Boolean handler for -named sort
 if [ ${nameSort} == 1 ]; then ARGS="${ARGS} -n "; fi
  
@@ -398,7 +398,7 @@ export PATH=$PATH:"$PWD/bin"
 ARGS=""
 # Add -m flag if maxMemSort was specified
 if [ ${maxMemSort} > 0 ]; then ARGS="${ARGS} -m $maxMemSort"; fi
-ARGS="-m $maxMemSort"
+
 # Boolean handler for -named sort
 if [ ${nameSort} == 1 ]; then ARGS="${ARGS} -n "; fi
  
