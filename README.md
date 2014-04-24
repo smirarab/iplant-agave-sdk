@@ -28,4 +28,7 @@ We have assembled this software development kit with an eye towards developers a
 * [Advanced app authoring with Launcher]
 
 ### Reporting errors and getting help
-Feel free to drop by the [Service Desk](https://pods.iplantcollaborative.org/jira/servicedesk/customer/sciapi) to report issues, or visit the [Ask iPlant](http://ask.iplantcollaborative.org/questions/) forums for in-depth help. 
+* Report issues at the [Service Desk](https://pods.iplantcollaborative.org/jira/servicedesk/customer/sciapi).
+* Visit the [Ask iPlant](http://ask.iplantcollaborative.org/questions/) forums for in-depth help.
+* Subscribe to [iPlant-API-Dev](http://mail.iplantcollaborative.org/mailman/listinfo/iplant-api-dev) for realtime updates and discussion. 
+
