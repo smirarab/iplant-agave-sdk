@@ -365,7 +365,7 @@ Parameters are specified in a JSON array, and are broadly similar to inputs and 
 
 Craft a shell script template
 -----------------------------
-Make a copy of your test-sort.sh script, so you can refer back to it later.
+Create sort.template using your test-sort.sh script as the starting point.  
 
 ```sh
 cp test-sort.sh sort.template
