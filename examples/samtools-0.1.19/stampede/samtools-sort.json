@@ -19,7 +19,7 @@
  "shortDescription":"Sort a BAM file by name or coordinate",
  "tags":["aligner","NGS","SAM"],
  "templatePath":"sort.template",
- "testPath":"sort.template",
+ "testPath":"test-sort.sh",
  "version":"0.1.19",
  "inputs":[
     {"id":"inputBam",
