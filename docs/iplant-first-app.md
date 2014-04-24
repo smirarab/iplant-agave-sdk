@@ -371,7 +371,7 @@ Make a copy of your test-sort.sh script, so you can refer back to it later.
 cp test-sort.sh sort.template
 ```
 
-Now, open test-sort.sh in the text editor of your choice. Delete the bash shebang line and the SLURM pragmas. Replace the hard-coded values for inputs and parameters with variables defined by your app description.
+Now, open sort.template in the text editor of your choice. Delete the bash shebang line and the SLURM pragmas. Replace the hard-coded values for inputs and parameters with variables defined by your app description.
 
 ```sh
 # Set up inputs...
