@@ -182,7 +182,7 @@ Open up samtools-sort.json in a text editor or [in your web browser](../examples
 
 ### Overview
 
-Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields in this document in the Model tab of the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1), but we will dive into a few key details here. 
+Your file *samtools-sort.json* is written in [JSON](http://www.json.org/), and conforms to an Agave-specific data model. You can find fully fleshed out details about all fields under *Parameters -> Data Type -> Model* at the [Agave API live docs on the /apps service](http://agaveapi.co/live-docs/#!/apps/add_post_1). We will dive into key elements here:
 
 To make this file work for you, you will be, at a minimum, editting:
 
