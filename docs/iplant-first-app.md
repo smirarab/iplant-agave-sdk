@@ -284,7 +284,7 @@ Here's a walkthrough of what these fields mean:
 While we don't support them 100% yet, Agave apps are designed to participate in workflows. Thus, just as we define the list of valid and required inputs to an app, we also must (when we know them) define a list of its outputs. This allows it to "advertise" to consumers of Agave services what it expects to emit, allowing apps to be chained together. Outputs are defined basically the same way as inputs:
 
 ```json
-{"id":"bam",
+{"id":"outputPrefix",
      "value":
         {"default":"sorted.bam",
          "order":0,
