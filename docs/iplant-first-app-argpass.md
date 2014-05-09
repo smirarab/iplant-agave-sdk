@@ -108,7 +108,34 @@ a.out --input foobaz.txt ${ARGS} > stdout.txt
 Implementation: "samtools sort" using argument passing
 -------------------------------------------------------
 
+In our previous example of samtools-sort.json, showArgument was set to "false" in the paramemter details for maxMemSort.  After we set this showArgument to "true" in the json file, see the corresponding change that is to be made below in the sort.template file.
 
+
+```sh
+input_bam=${inputBam}
+output_prefix=${outputPrefix}
+max_mem_sort=${maxMemSort}
+name_sort=${nameSort}
+
+tar -xvf bin.tgz
+
+export PATH=$PATH:"$PWD/bin"
+ 
+ARGS=""
+
+# The line below was used when the json file did not use argument passing for maxMemSort
+# if [ ${max_mem_sort} -gt 0 ]; then ARGS="${ARGS} -m $max_mem_sort"; fi
+
+# Now the line below incorporates argument passing for maxMemSort
+if [ -n "${max_mem_sort}" ]; then ARGS="$ARGS ${max_mem_sort}"; fi
+
+if [ ${name_sort} -eq 1 ]; then ARGS="${ARGS} -n "; fi
+
+samtools sort ${ARGS} ${input_bam} ${output_prefix}
+
+rm -rf bin
+
+```
 
 *This completes the section on using Agave argument passing in your apps.*
 
