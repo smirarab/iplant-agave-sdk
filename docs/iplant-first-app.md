@@ -153,7 +153,7 @@ if [ ${maxMemSort} -gt 0 ]; then ARGS="${ARGS} -m $maxMemSort"; fi
 if [ ${nameSort} -eq 1 ]; then ARGS="${ARGS} -n "; fi
  
 # Run the actual program
-samtools sort ${ARGS} $inputBam ${outputPrefix}
+samtools sort ${ARGS} ${inputBam} ${outputPrefix}
 
 # Now, delete the bin/ directory
 rm -rf bin
@@ -279,51 +279,9 @@ Here's a walkthrough of what these fields mean:
 * storageSystem namespace: agave://storage-system-name/path/to/file
 * public URI namespace: https://www.cnn.com/index.html
 
-### Outputs
-
-While we don't support them 100% yet, Agave apps are designed to participate in workflows. Thus, just as we define the list of valid and required inputs to an app, we also must (when we know them) define a list of its outputs. This allows it to "advertise" to consumers of Agave services what it expects to emit, allowing apps to be chained together. Outputs are defined basically the same way as inputs:
-
-```json
-{"id":"outputPrefix",
-     "value":
-        {"default":"sorted.bam",
-         "order":0,
-         "required":false,
-         "validator":"",
-         "visible":true},
-     "semantics":
-        {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],
-         "minCardinality":1,
-         "fileTypes":["raw-0"]},
-     "details":
-        {"description":"",
-         "label":"Sorted BAM file",
-         "argument":null,
-         "showArgument":false}}
-```
-
-Obligatory field walk-through:
-
-| Field | Mandatory | Type | Description |
-| ----- | --------- | ---- | ----------- |
-| id | X | string | This is the "name" of the output. It is not currently used by the wrapper script but may be in the future|
-| id.value.default | | string | If your app has a fixed-name output, specify it here |
-| id.value.order | | integer | Ignore for now |
-| id.value.validator | | string | [Java-format regular expression](http://ocpsoft.org/opensource/guide-to-regular-expressions-in-java-part-1/) used to match output files |
-| semantics.ontology | | array[string] | List of ontology terms (or URIs pointing to ontology terms) applicable to the output format |
-| semantics.minCardinality | | integer | Minimum number of values expected for this output |
-| semantics.maxCardinality | | integer | Maximum number of values expected for this output |
-| semantics.fileTypes | X | array[string] | List of Agave file types that may apply to the output. Always use "raw-0" for the time being |
-| details.description | | string | Human-readable description of the output |
-| details.label | | string | Human-readable label for the output |
-| details.argument | | string | The command-line argument associated with specifying this output at run time (not currently used) |
-| details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated (not currently used) |
-
-*Note*: If the app you are working on doesn't natively produce output with a predictable name, one thing you can do is add extra logic to your script to take the existing output and rename it to something you can control or predict. 
-
 ### Parameters
 
-Parameters are specified in a JSON array, and are broadly similar to inputs and outputs. Here's an example of the parameter we will define allowing users to specify how much RAM to use in a "samtools sort" operation.
+Parameters are specified in a JSON array, and are broadly similar to inputs. Here's an example of the parameter we will define allowing users to specify how much RAM to use in a "samtools sort" operation.
 
 ```json
     {"id":"maxMemSort",
@@ -357,6 +315,51 @@ Parameters are specified in a JSON array, and are broadly similar to inputs and 
 | details.label | | string | Human-readable label for the parameter. Often implemented as text label next to the field in automatically generated UI |
 | details.argument | | string | The command-line argument associated with specifying this parameter at run time |
 | details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated |
+
+
+### Outputs
+
+While we don't support outputs 100% yet, Agave apps are designed to participate in workflows. Thus, just as we define the list of valid and required inputs to an app, we also must (when we know them) define a list of its outputs. This allows it to "advertise" to consumers of Agave services what it expects to emit, allowing apps to be chained together. Note that unlike inputs and parameters, output "id"s are NOT passed to the template file.  If you must specify an output filename in the application json, do it as a parameter!  Outputs are defined basically the same way as inputs:
+
+```json
+{"id":"bam",
+     "value":
+        {"default":"sorted.bam",
+         "order":0,
+         "required":false,
+         "validator":"",
+         "visible":true},
+     "semantics":
+        {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],
+         "minCardinality":1,
+         "fileTypes":["raw-0"]},
+     "details":
+        {"description":"",
+         "label":"Sorted BAM file",
+         "argument":null,
+         "showArgument":false}}
+```
+
+Obligatory field walk-through:
+
+| Field | Mandatory | Type | Description |
+| ----- | --------- | ---- | ----------- |
+| id | X | string | This is the "name" of the output. It is not currently used by the wrapper script but may be in the future|
+| id.value.default | | string | If your app has a fixed-name output, specify it here |
+| id.value.order | | integer | Ignore for now |
+| id.value.required | X | boolean | Is specification of this input mandatory to run a job? |
+| id.value.validator | | string | [Java-format regular expression](http://ocpsoft.org/opensource/guide-to-regular-expressions-in-java-part-1/) used to match output files |
+| id.value.visible | | boolean | When automatically generated a UI, should this field be visible to end users? |
+| semantics.ontology | | array[string] | List of ontology terms (or URIs pointing to ontology terms) applicable to the output format |
+| semantics.minCardinality | | integer | Minimum number of values expected for this output |
+| semantics.maxCardinality | | integer | Maximum number of values expected for this output |
+| semantics.fileTypes | X | array[string] | List of Agave file types that may apply to the output. Always use "raw-0" for the time being |
+| details.description | | string | Human-readable description of the output |
+| details.label | | string | Human-readable label for the output |
+| details.argument | | string | The command-line argument associated with specifying this output at run time (not currently used) |
+| details.showArgument | | boolean | Include the argument in the substitution done by Agave when a run script is generated (not currently used) |
+
+*Note*: If the app you are working on doesn't natively produce output with a predictable name, one thing you can do is add extra logic to your script to take the existing output and rename it to something you can control or predict. 
 
 ### Tools and Utilities
 1. If you're used to Perl regex, Java expressions have slightly different syntax. To test out your validation expressions, you can use a handy tool at [RegexPlanet](http://www.regexplanet.com/advanced/java/index.html).
