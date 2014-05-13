@@ -70,7 +70,7 @@
          "argument":"-n ",
          "showArgument":false}}],
  "outputs":[
-    {"id":"outputPrefix",
+    {"id":"bam",
      "value":
         {"default":"sorted.bam",
          "order":0,
