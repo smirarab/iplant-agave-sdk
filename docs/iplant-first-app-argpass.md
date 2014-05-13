@@ -108,34 +108,188 @@ a.out --input foobaz.txt ${ARGS} > stdout.txt
 Implementation: "samtools sort" using argument passing
 -------------------------------------------------------
 
-In our previous example of samtools-sort.json, showArgument was set to "false" in the paramemter details for maxMemSort.  After we set this showArgument to "true" in the json file, see the corresponding change that is to be made below in the sort.template file.
+Here we show the updated files for "samtools sort" using argument passing.  The two files updated are samtools-sort.json and sort.template.  The job file, samtools-sort-02-job.json, did not need to be modified but is shown for completeness.  
 
+### samtools-sort.json
+
+In our previous example of samtools-sort.json, showArgument was set to "false" for each parameter.  Seen below, it is now set to "true" for the parameters maxMemSort and outputBam.
 
 ```sh
-input_bam=${inputBam}
-output_prefix=${outputPrefix}
-max_mem_sort=${maxMemSort}
+{"available":true,
+ "checkpointable":false,
+ "defaultMemoryPerNode":32,
+ "defaultProcessorsPerNode":16,
+ "defaultMaxRunTime":"08:00:00",
+ "defaultNodeCount":1,
+ "defaultQueue":"serial",
+ "deploymentPath":"jcarson/applications/samtools-0.1.19/stampede",
+ "deploymentSystem":"data.iplantcollaborative.org",
+ "executionSystem":"stampede-04242014-1023-jcarson",
+ "executionType":"HPC",
+ "helpURI":"http://samtools.sourceforge.net/samtools.shtml",
+ "label": "SAMtools sort",
+ "longDescription":"",
+ "modules":[],
+ "name":"jcarson-samtools-sort",
+ "ontology":["http://sswapmeet.sswap.info/agave/apps/Application"],
+ "parallelism":"SERIAL",
+ "shortDescription":"Sort a BAM file by name or coordinate",
+ "tags":["aligner","NGS","SAM"],
+ "templatePath":"sort.template",
+ "testPath":"test-sort.sh",
+ "version":"0.1.19",
+ "inputs":[
+    {"id":"inputBam",
+     "value":
+        {"default":"",
+         "order":0,
+         "required":true,
+         "validator":".bam$",
+         "visible":true},
+     "semantics":
+        {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],
+         "minCardinality":1,
+         "fileTypes":["raw-0"]},
+     "details":
+        {"description":"",
+         "label":"The BAM file to sort",
+         "argument":null,
+         "showArgument":false}}],
+ "parameters":[
+   {"id":"maxMemSort",
+     "value":
+        {"default":"500000000",
+         "order":1,
+         "required":true,
+         "type":"number",
+         "validator":"",
+         "visible":true},
+     "semantics":
+        {"ontology":["xs:integer"]},
+     "details":
+        {"description":null,
+         "label":"Maximum memory in bytes, used for sorting",
+         "argument":"-m ",
+         "showArgument":true}},
+    {"id":"nameSort",
+     "value":
+        {"default":false,
+         "order":1,
+         "required":false,
+         "type":"bool",
+         "validator":"",
+         "visible":true},
+     "semantics":
+        {"ontology":["xs:boolean"]},
+     "details":
+        {"description":null,
+         "label":"Sort by name rather than coordinate",
+         "argument":"-n ",
+         "showArgument":false}},
+    {"id":"outputBam",
+     "value":
+        {"default":"sorted.bam",
+         "order":1,
+         "required":true,
+         "type":"string",
+         "validator":"",
+         "visible":true},
+     "semantics":
+        {"ontology":["xs:string"]},
+     "details":
+        {"description":null,
+         "label":"Sorted BAM filename",
+         "argument":"-f ",
+         "showArgument":true}}],
+ "outputs":[
+   {"id":"bam",
+     "value":
+        {"default":"sorted.bam",
+         "order":0,
+         "required":false,
+         "validator":".bam$",
+         "visible":true},
+     "semantics":
+        {"ontology":["http://sswapmeet.sswap.info/mime/application/X-bam"],
+         "minCardinality":1,
+         "fileTypes":["raw-0"]},
+     "details":
+        {"description":"",
+         "label":"Sorted BAM file",
+         "argument":null,
+         "showArgument":false}}]}
+```
+
+### sort.template
+
+With the use of argument passing, the template file is accordingly simplified.
+
+```sh
+input_bam="${inputBam}"
+output_bam="${outputBam}"
+max_mem_sort="${maxMemSort}"
 name_sort=${nameSort}
 
 tar -xvf bin.tgz
 
 export PATH=$PATH:"$PWD/bin"
- 
+
 ARGS=""
 
-# The line below was used when the json file did not use argument passing for maxMemSort
-# if [ ${max_mem_sort} -gt 0 ]; then ARGS="${ARGS} -m $max_mem_sort"; fi
-
-# Now the line below incorporates argument passing for maxMemSort
-if [ -n "${max_mem_sort}" ]; then ARGS="$ARGS ${max_mem_sort}"; fi
+ARGS="$ARGS ${max_mem_sort}"
 
 if [ ${name_sort} -eq 1 ]; then ARGS="${ARGS} -n "; fi
 
-samtools sort ${ARGS} ${input_bam} ${output_prefix}
+samtools sort ${ARGS} ${input_bam} ${output_bam}
 
 rm -rf bin
 
 ```
+
+### samtools-sort-02-job.json
+
+For completeness, the job json file used in this example is shown below.
+
+```sh
+{
+    "jobName": "samtools-sort-02",
+    "softwareName": "jcarson-samtools-sort-0.1.19",
+    "processorsPerNode": 16,
+    "requestedTime": "01:00:00",
+    "memoryPerNode": 32,
+    "nodeCount": 1,
+    "batchQueue": "serial",
+    "archive": false,
+    "archivePath": "",
+    "inputs": {
+        "inputBam": "agave://data.iplantcollaborative.org/shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam"
+    },
+    "parameters":{
+    	"maxMemSort":800000000,
+    	"nameSort":true
+        "outputBam": "ex1_sorted.bam"
+    }
+}
+```
+
+The resulting generated command is:
+```sh
+samtools sort  -m 800000000 -n  ex1.bam -f ex1_sorted.bam
+```
+
+### CLI utilized
+
+As a reminder, the sequence of command line calls used in this example is shown below.  Be sure to substitute your own iPlant username below, as well as in the above scripts as appropriate.
+```sh
+$IPLANTUSERNAME=jcarson
+auth-tokens-create -S -v
+files-upload -S data.iplantcollaborative.org -F samtools-0.1.19/stampede/sort.template $IPLANTUSERNAME/applications/samtools-0.1.19/stampede/
+files-upload -S data.iplantcollaborative.org -F samtools-0.1.19/stampede/samtools-sort.json $IPLANTUSERNAME/applications/samtools-0.1.19/stampede/
+apps-addupdate -F samtools-0.1.19/stampede/samtools-sort.json
+jobs-submit -F jobs/samtools-sort-02-job.json
+```
+
+
 
 *This completes the section on using Agave argument passing in your apps.*
 
