@@ -112,7 +112,7 @@ Here we show the updated files for "samtools sort" using argument passing.  The 
 
 ### samtools-sort.json
 
-In our previous example of samtools-sort.json, showArgument was set to "false" for each parameter.  Seen below, it is now set to "true" for the parameters maxMemSort and outputBam.
+In our previous example of samtools-sort.json, showArgument was set to "false" for each parameter.  Seen below, it is now set to "true" for the parameter maxMemSort.  In addition, we've added the ability to specify the output filename, outputBam, which will also use argument passing.
 
 ```sh
 {"available":true,
@@ -264,10 +264,13 @@ For completeness, the job json file used in this example is shown below.
     "inputs": {
         "inputBam": "agave://data.iplantcollaborative.org/shared/iplantcollaborative/example_data/Samtools_mpileup/ex1.bam"
     },
-    "parameters":{
+    "parameters": {
     	"maxMemSort":800000000,
     	"nameSort":true
         "outputBam": "ex1_sorted.bam"
+    }
+    "outputs": {
+    	"bam": "ex1_sorted.bam"
     }
 }
 ```
