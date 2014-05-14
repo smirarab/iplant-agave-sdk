@@ -21,6 +21,7 @@ We have assembled this software development kit with an eye towards developers a
 * [Creating an iPlant application for TACC Stampede](docs/iplant-first-app.md)
 * [Running and debugging a job using your Agave app](docs/iplant-first-app-job.md)
 * [Sharing your Agave app with others](docs/iplant-share-app.md)
+* [Crafting applications using Agave argument passing](/docs/iplant-first-app-argpass.md)
 
 *Additional Guides*
 * [Setting up your own systems]
