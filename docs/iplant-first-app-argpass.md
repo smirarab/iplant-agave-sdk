@@ -284,7 +284,7 @@ samtools sort  -m 800000000 -n  ex1.bam -f ex1_sorted.bam
 
 As a reminder, the sequence of command line calls used in this example is shown below.  Be sure to substitute your own iPlant username below, as well as in the above scripts as appropriate.
 ```sh
-$IPLANTUSERNAME=jcarson
+IPLANTUSERNAME=jcarson
 auth-tokens-create -S -v
 files-upload -S data.iplantcollaborative.org -F samtools-0.1.19/stampede/sort.template $IPLANTUSERNAME/applications/samtools-0.1.19/stampede/
 files-upload -S data.iplantcollaborative.org -F samtools-0.1.19/stampede/samtools-sort.json $IPLANTUSERNAME/applications/samtools-0.1.19/stampede/
