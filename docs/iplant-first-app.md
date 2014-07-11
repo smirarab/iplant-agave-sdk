@@ -347,7 +347,7 @@ Obligatory field walk-through:
 | id | X | string | This is the "name" of the output. It is not currently used by the wrapper script but may be in the future|
 | id.value.default | | string | If your app has a fixed-name output, specify it here |
 | id.value.order | | integer | Ignore for now |
-| id.value.required | X | boolean | Is specification of this input mandatory to run a job? |
+| id.value.required | X | boolean | Ignore |
 | id.value.validator | | string | [Java-format regular expression](http://ocpsoft.org/opensource/guide-to-regular-expressions-in-java-part-1/) used to match output files |
 | id.value.visible | | boolean | When automatically generated a UI, should this field be visible to end users? |
 | semantics.ontology | | array[string] | List of ontology terms (or URIs pointing to ontology terms) applicable to the output format |
