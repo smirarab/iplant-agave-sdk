@@ -436,7 +436,7 @@ Post the app description to Agave
 ---------------------------------
 
 As mentioned in the overview, several personalizations to samtools-sort.json are required.  Specifically, edit the samtools-sort.json file to change:
-* the *executionSystem* to your private Stampede system, 
+* the *executionSystem* to your private Stampede system (this is what you created using `iplant-systems-create` in previous steps; you can run `systems-list` to see the list of systems you have created), 
 * the *deploymentPath* to your own iPlant applications directory for samtools
 * the *name* to *$IPLANTUSERNAME-samtools-sort*
 
